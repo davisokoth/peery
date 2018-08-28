@@ -1,27 +1,35 @@
 var express = require('express');
 var app = express();
-var ExpressPeerServer = require('peer').ExpressPeerServer;
+var http = require('http').Server(app);
+var io = require('socket.io')(http);
 
-app.get('/', function(req, res, next) { res.sendFile(__dirname + '/index.html'); });
+app.get('/', function(req, res){
+  res.sendFile(__dirname + '/index.html');
+});
 
-// =======
+io.on('connection', function(client){
+    console.log('a user connected');
+    client.on('register', handleRegister)
 
-var server = app.listen(process.env.PORT || 3000)
+    client.on('join', handleJoin)
 
-var options = {
-    debug: true
-}
+    client.on('leave', handleLeave)
 
-var peerserver = ExpressPeerServer(server, options);
+    client.on('message', handleMessage)
 
-app.use('/api', peerserver);
+    client.on('availableUsers', handleGetAvailableUsers)
 
-// == OR ==
-/*
-var server = require('http').createServer(app);
-var peerserver = ExpressPeerServer(server, options);
+    client.on('disconnect', function () {
+        console.log('client disconnect...', client.id)
+        handleDisconnect()
+    })
 
-app.use('/peerjs', peerserver);
+    client.on('error', function (err) {
+        console.log('received error from client:', client.id)
+        console.log(err)
+    })
+})
 
-server.listen(9000);
-*/
+http.listen(process.env.PORT || 3000, function(){
+  console.log('listening on *:3000');
+});
