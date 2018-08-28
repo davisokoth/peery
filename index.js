@@ -2,11 +2,11 @@ var express = require('express');
 var app = express();
 var ExpressPeerServer = require('peer').ExpressPeerServer;
 
-app.get('/', function(req, res, next) { res.send('Hello world!'); });
+app.get('/', function(req, res, next) { res.sendFile(__dirname + '/index.html'); });
 
 // =======
 
-var server = app.listen(9000);
+var server = app.listen(3000);
 
 var options = {
     debug: true
